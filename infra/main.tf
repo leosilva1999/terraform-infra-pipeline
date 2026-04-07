@@ -1,10 +1,21 @@
+data "aws_ami" "ecs" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-ecs-hvm-*"]
+  }
+
+  owners = ["amazon"]
+}
+
 resource "aws_s3_bucket" "bucket"{
     bucket = var.bucket_name
 }
 
 resource "aws_security_group" "securitygoup" {
   name = "securitygroup"
-  description = "permitir acesso http e saída para internet"
+  description = "allow http access and internet outbound"
 
   ingress {
     from_port = 80
@@ -35,6 +46,8 @@ resource "aws_ecs_task_definition" "titools-app" {
       name = "titools"
       image = "leozaodev99/titoolsbackend:latest"
 
+      memory = 256
+      
       portMapping = [
         {
           containerPort = 80
@@ -46,7 +59,7 @@ resource "aws_ecs_task_definition" "titools-app" {
 }
 
 resource "aws_instance" "ecs" {
-  ami = "ami-ecs-optimized"
+  ami = data.aws_ami.ecs.id
   instance_type = "t2.micro"
 
   user_data = file("user_data.sh")
