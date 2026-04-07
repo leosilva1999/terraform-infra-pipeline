@@ -5,6 +5,10 @@ data "aws_ami" "ecs" {
     name   = "name"
     values = ["amzn2-ami-ecs-hvm-*"]
   }
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
 
   owners = ["amazon"]
 }
