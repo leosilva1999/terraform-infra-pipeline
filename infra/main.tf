@@ -60,7 +60,7 @@ resource "aws_ecs_task_definition" "titools-app" {
 
 resource "aws_instance" "ecs" {
   ami = data.aws_ami.ecs.id
-  instance_type = "t2.micro"
+  instance_type = "t3.micro"
 
   user_data = file("user_data.sh")
 }
