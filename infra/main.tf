@@ -18,6 +18,11 @@ data "aws_subnet" "default" {
   availability_zone = "sa-east-1a"
 }
 
+resource "aws_cloudwatch_log_group" "ecs" {
+  name = "/ecs/titools"
+  retention_in_days = 7
+}
+
 resource "aws_s3_bucket" "bucket"{
     bucket = var.bucket_name
 }
@@ -64,6 +69,15 @@ resource "aws_ecs_task_definition" "titools-app" {
 
       memory = 256
       
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = "/ecs/titools"
+          awslogs-region        = "sa-east-1"
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+
       portMappings = [
         {
           containerPort = 80
@@ -91,6 +105,15 @@ resource "aws_ecs_task_definition" "titools-app" {
     image = "mysql:8.0"
 
     memory = 256
+
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-group         = "/ecs/titools"
+        awslogs-region        = "sa-east-1"
+        awslogs-stream-prefix = "ecs"
+      }
+    }
 
     portMappings = [
       {
