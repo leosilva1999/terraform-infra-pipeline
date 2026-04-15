@@ -23,7 +23,7 @@ resource "aws_s3_bucket" "bucket"{
 }
 
 resource "aws_security_group" "titools-sg" {
-  name = "securitygroup"
+  name = "titools-sg"
   description = "allow http access and internet outbound"
 
   ingress {
