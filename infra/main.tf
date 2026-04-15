@@ -13,17 +13,29 @@ data "aws_ami" "ecs" {
   owners = ["amazon"]
 }
 
+data "aws_subnet" "default" {
+  default_for_az = true
+  availability_zone = "sa-east-1a"
+}
+
 resource "aws_s3_bucket" "bucket"{
     bucket = var.bucket_name
 }
 
-resource "aws_security_group" "securitygoup" {
+resource "aws_security_group" "titools-sg" {
   name = "securitygroup"
   description = "allow http access and internet outbound"
 
   ingress {
     from_port = 80
     to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 3306
+    to_port = 3306
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -52,13 +64,56 @@ resource "aws_ecs_task_definition" "titools-app" {
 
       memory = 256
       
-      portMapping = [
+      portMappings = [
         {
           containerPort = 80
           hostPort = 80
         }
       ]
-    }
+
+      environment = [
+      {
+        name  = "DB_HOST"
+        value = "localhost"
+      },
+      {
+        name  = "DB_USER"
+        value = "root"
+      },
+            {
+        name  = "MYSQL_ROOT_PASSWORD"
+        value = var.db_password
+      }
+    ]
+    },
+    {
+    name  = "mysql"
+    image = "mysql:8.0"
+
+    memory = 256
+
+    portMappings = [
+      {
+        containerPort = 3306
+        hostPort      = 3306
+      }
+    ]
+
+    environment = [
+      {
+        name  = "MYSQL_ROOT_PASSWORD"
+        value = var.db_password
+      },
+      {
+        name  = "MYSQL_DATABASE"
+        value = "titoolsdb"
+      },
+      {
+        name  = "MYSQL_ROOT_HOST"
+        value = "%"
+      }
+    ]
+  }
   ])
 }
 
@@ -66,12 +121,44 @@ resource "aws_instance" "ecs" {
   ami = data.aws_ami.ecs.id
   instance_type = "t3.micro"
 
+  iam_instance_profile = aws_iam_instance_profile.ecs_profile.name
+  vpc_security_group_ids = [aws_security_group.securitygoup.id]
+  subnet_id = data.aws_subnet.default.id
+  associate_public_ip_address = true
+
   user_data = file("user_data.sh")
 }
 
 resource "aws_ecs_service" "titools" {
   name = "titools-api-service"
+  depends_on = [aws_instance.ecs]
+  launch_type = "EC2"
   cluster = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.titools-app.arn
   desired_count = 1
+}
+
+resource "aws_iam_role" "ecs_instance_role" {
+  name = "ecsInstanceRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_policy" {
+  role       = aws_iam_role.ecs_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_iam_instance_profile" "ecs_profile" {
+  name = "ecsInstanceProfile"
+  role = aws_iam_role.ecs_instance_role.name
 }
