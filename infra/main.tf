@@ -122,7 +122,7 @@ resource "aws_instance" "ecs" {
   instance_type = "t3.micro"
 
   iam_instance_profile = aws_iam_instance_profile.ecs_profile.name
-  vpc_security_group_ids = [aws_security_group.securitygoup.id]
+  vpc_security_group_ids = [aws_security_group.titools-sg.id]
   subnet_id = data.aws_subnet.default.id
   associate_public_ip_address = true
 
