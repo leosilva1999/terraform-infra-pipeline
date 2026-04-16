@@ -69,6 +69,13 @@ resource "aws_ecs_task_definition" "titools-app" {
 
       memory = 256
       
+      dependsOn = [
+        {
+          containerName = "mysql"
+          condition     = "HEALTHY"
+        }
+      ]
+
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -87,16 +94,28 @@ resource "aws_ecs_task_definition" "titools-app" {
 
       environment = [
       {
-        name  = "DB_HOST"
-        value = "localhost"
+        name  = "ASPNETCORE_ENVIRONMENT"
+        value = "Production"
       },
       {
-        name  = "DB_USER"
-        value = "root"
+        name  = "ASPNETCORE_URLS"
+        value = "http://+:80"
+      },
+      {
+        name  = "ConnectionStrings__MySqlConnection:"
+        value = "Server=mysql;Port=3306;Database=titoolsdb;Uid=titools;Pwd=${var.db_password}"
+      },
+      {
+        name  = "JwtTest__ValidIssuer"
+        value = "http://localhost:80/"
+      },
+      {
+        name  = "JwtTest__ValidAudience"
+        value = "http://localhost:80"
       },
             {
-        name  = "MYSQL_ROOT_PASSWORD"
-        value = var.db_password
+        name  = "JwtTest__SecretKey"
+        value = "CPfYHWwn0ewUdu9jpry+fyUtiwnYm2Zdr6KEpaWFuhA="
       }
     ]
     },
@@ -132,10 +151,26 @@ resource "aws_ecs_task_definition" "titools-app" {
         value = "titoolsdb"
       },
       {
+        name  = "MYSQL_USER"
+        value = "titools"
+      },
+      {
+        name  = "MYSQL_PASSWORD"
+        value = var.db_password
+      },
+      {
         name  = "MYSQL_ROOT_HOST"
         value = "%"
       }
     ]
+
+    healthCheck = {
+      command     = ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval    = 10
+      timeout     = 5
+      retries     = 5
+      startPeriod = 30
+    }
   }
   ])
 }
