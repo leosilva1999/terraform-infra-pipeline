@@ -123,7 +123,7 @@ resource "aws_ecs_task_definition" "titools-app" {
     name  = "mysql"
     image = "mysql:8.0"
 
-    memory = 256
+    memory = 512
 
     logConfiguration = {
       logDriver = "awslogs"
