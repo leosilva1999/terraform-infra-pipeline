@@ -102,7 +102,7 @@ resource "aws_ecs_task_definition" "titools-app" {
         value = "http://+:80"
       },
       {
-        name  = "ConnectionStrings__MySqlConnection:"
+        name  = "ConnectionStrings__MySqlConnection"
         value = "Server=mysql;Port=3306;Database=titoolsdb;Uid=titools;Pwd=${var.db_password}"
       },
       {
