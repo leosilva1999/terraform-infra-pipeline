@@ -18,3 +18,5 @@ jobs:
             aws-region: "sa-east-1"
             aws-statefile-s3-bucket: "leosilva1999-sa-east-1-terraform-statefile"
             aws-lock-dynamodb-table: "leosilva1999-sa-east-1-terraform-lock"
+        secrets:
+            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
