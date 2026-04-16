@@ -165,11 +165,11 @@ resource "aws_ecs_task_definition" "titools-app" {
     ]
 
     healthCheck = {
-      command     = ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      command     = ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
       interval    = 10
       timeout     = 5
-      retries     = 5
-      startPeriod = 30
+      retries     = 20
+      startPeriod = 60
     }
   }
   ])
