@@ -18,6 +18,10 @@ on:
       aws-lock-dynamodb-table:
         type: string
         required: true
+    
+    secrets:
+      DB_PASSWORD:
+        required: true
 
 jobs:
   terraform:
