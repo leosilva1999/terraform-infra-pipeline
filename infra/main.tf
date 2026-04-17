@@ -13,9 +13,6 @@ data "aws_ami" "ecs" {
   owners = ["amazon"]
 }
 
-data "aws_key_pair" "existing" {
-  key_name = "PrincipalKey"
-}
 
 data "aws_subnet" "default" {
   default_for_az = true
@@ -192,7 +189,7 @@ resource "aws_instance" "ecs" {
   ami = data.aws_ami.ecs.id
   instance_type = "t3.micro"
 
-  key_name = data.aws_key_pair.existing.PrincipalKey
+  key_name = "PrincipalKey"
 
   iam_instance_profile = aws_iam_instance_profile.ecs_profile.name
   vpc_security_group_ids = [aws_security_group.titools-sg.id]
