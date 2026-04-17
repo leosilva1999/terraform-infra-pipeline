@@ -167,7 +167,7 @@ resource "aws_ecs_task_definition" "titools-app" {
     healthCheck = {
       command = [
         "CMD-SHELL",
-        "mysql -h 127.0.0.1 -u$MYSQL_USER -p$MYSQL_PASSWORD -e \"SELECT 1\""
+        "mysql -h 172.31.12.170 -u$MYSQL_USER -p$MYSQL_PASSWORD -e \"SELECT 1\""
       ]
       interval    = 10
       timeout     = 5
