@@ -13,6 +13,10 @@ data "aws_ami" "ecs" {
   owners = ["amazon"]
 }
 
+data "aws_key_pair" "existing" {
+  key_name = "PrincipalKey"
+}
+
 data "aws_subnet" "default" {
   default_for_az = true
   availability_zone = "sa-east-1a"
@@ -34,6 +38,12 @@ resource "aws_security_group" "titools-sg" {
   ingress {
     from_port = 80
     to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = 22
+    to_port = 22
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -181,6 +191,8 @@ resource "aws_ecs_task_definition" "titools-app" {
 resource "aws_instance" "ecs" {
   ami = data.aws_ami.ecs.id
   instance_type = "t3.micro"
+
+  key_name = data.aws_key_pair.existing.PrincipalKey
 
   iam_instance_profile = aws_iam_instance_profile.ecs_profile.name
   vpc_security_group_ids = [aws_security_group.titools-sg.id]
