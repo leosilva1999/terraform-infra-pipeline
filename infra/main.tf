@@ -103,7 +103,7 @@ resource "aws_ecs_task_definition" "titools-app" {
       },
       {
         name  = "ConnectionStrings__MySqlConnection"
-        value = "Server=mysql;Port=3306;Database=titoolsdb;Uid=titools;Pwd=${var.db_password}"
+        value = "Server=127.0.0.1;Port=3306;Database=titoolsdb;Uid=titools;Pwd=${var.db_password}"
       },
       {
         name  = "JwtTest__ValidIssuer"
