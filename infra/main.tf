@@ -75,6 +75,13 @@ resource "aws_ecs_task_definition" "titools-app" {
       image = "leozaodev99/titoolsbackend:latest"
 
       memory = 256
+
+      extraHosts = [
+        {
+          hostname  = "host.docker.internal"
+          ipAddress = "172.17.0.1"
+        }
+      ]
       
       dependsOn = [
         {
@@ -110,7 +117,7 @@ resource "aws_ecs_task_definition" "titools-app" {
       },
       {
         name  = "ConnectionStrings__MySqlConnection"
-        value = "Server=127.0.0.1;Port=3306;Database=titoolsdb;Uid=titools;Pwd=${var.db_password}"
+        value = "Server=host.docker.internal;Port=3306;Database=titoolsdb;Uid=titools;Pwd=${var.db_password}"
       },
       {
         name  = "JwtTest__ValidIssuer"
@@ -174,7 +181,7 @@ resource "aws_ecs_task_definition" "titools-app" {
     healthCheck = {
       command = [
         "CMD-SHELL",
-        "mysql -h 127.0.0.1 -u$MYSQL_USER -p$MYSQL_PASSWORD -e \"SELECT 1\""
+        "mysql -h host.docker.internal -u$MYSQL_USER -p$MYSQL_PASSWORD -e \"SELECT 1\""
       ]
       interval    = 10
       timeout     = 5
