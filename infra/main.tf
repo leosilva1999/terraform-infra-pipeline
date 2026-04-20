@@ -208,7 +208,6 @@ resource "aws_ecs_service" "titools" {
   network_configuration {
     subnets         = [data.aws_subnet.default.id]
     security_groups = [aws_security_group.titools-sg.id]
-    assign_public_ip = true
   }
 }
 
