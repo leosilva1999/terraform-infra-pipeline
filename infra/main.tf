@@ -66,7 +66,7 @@ resource "aws_ecs_cluster" "main" {
 
 resource "aws_ecs_task_definition" "titools-app" {
   family = "titools-api"
-  network_mode = "awsvpc"
+  network_mode = "bridge"
   requires_compatibilities = ["EC2"]
 
   container_definitions = jsonencode([
@@ -95,6 +95,7 @@ resource "aws_ecs_task_definition" "titools-app" {
       portMappings = [
         {
           containerPort = 80
+          hostPort = 80
         }
       ]
 
@@ -143,6 +144,7 @@ resource "aws_ecs_task_definition" "titools-app" {
     portMappings = [
       {
         containerPort = 3306
+        hostPort      = 3306
       }
     ]
 
@@ -204,11 +206,6 @@ resource "aws_ecs_service" "titools" {
   cluster = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.titools-app.arn
   desired_count = 1
-
-  network_configuration {
-    subnets         = [data.aws_subnet.default.id]
-    security_groups = [aws_security_group.titools-sg.id]
-  }
 }
 
 resource "aws_iam_role" "ecs_instance_role" {
