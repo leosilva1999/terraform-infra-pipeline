@@ -66,7 +66,7 @@ resource "aws_ecs_cluster" "main" {
 
 resource "aws_ecs_task_definition" "titools-app" {
   family = "titools-api"
-  network_mode = "bridge"
+  network_mode = "awsvpc"
   requires_compatibilities = ["EC2"]
 
   container_definitions = jsonencode([
@@ -117,7 +117,7 @@ resource "aws_ecs_task_definition" "titools-app" {
       },
       {
         name  = "ConnectionStrings__MySqlConnection"
-        value = "Server=host.docker.internal;Port=3306;Database=titoolsdb;Uid=titools;Pwd=${var.db_password}"
+        value = "Server=mysql;Port=3306;Database=titoolsdb;Uid=titools;Pwd=${var.db_password}"
       },
       {
         name  = "JwtTest__ValidIssuer"
@@ -181,7 +181,7 @@ resource "aws_ecs_task_definition" "titools-app" {
     healthCheck = {
       command = [
         "CMD-SHELL",
-        "mysql -h host.docker.internal -u$MYSQL_USER -p$MYSQL_PASSWORD -e \"SELECT 1\""
+        "mysqladmin ping -h 127.0.0.1 -u$MYSQL_USER -p$MYSQL_PASSWORD -e \"SELECT 1\""
       ]
       interval    = 10
       timeout     = 5
@@ -213,6 +213,10 @@ resource "aws_ecs_service" "titools" {
   cluster = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.titools-app.arn
   desired_count = 1
+  network_configuration {
+    subnets         = [data.aws_subnet.default.id]
+    security_groups = [aws_security_group.titools-sg.id]
+  }
 }
 
 resource "aws_iam_role" "ecs_instance_role" {
